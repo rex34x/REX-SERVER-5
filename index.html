@@ -1,0 +1,202 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>REX SYSTEM | CONTROL PRO</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com" rel="stylesheet">
+    <style>
+        body { background-color: #050505; color: white; font-family: 'Tajawal', sans-serif; overflow: hidden; height: 100vh; }
+        .names-sidebar { position: fixed; right: 0; top: 0; width: 280px; height: 100%; background: #0a0a0a; border-left: 1px solid #1a1a1a; padding: 20px; z-index: 50; }
+        .name-card { background: #111; padding: 12px; margin-bottom: 10px; border-radius: 12px; border-right: 3px solid #7c3aed; font-size: 13px; }
+        #side-admin { position: fixed; top: 0; left: -350px; width: 340px; height: 100%; background: #080808; transition: 0.5s; border-right: 2px solid #7c3aed; z-index: 2000; padding: 25px; overflow-y: auto; }
+        #side-admin.active { left: 0; }
+        #admin-plus-btn { position: fixed; bottom: 30px; left: 30px; width: 70px; height: 70px; background: #7c3aed; border-radius: 20px; display: none; align-items: center; justify-content: center; font-size: 40px; cursor: pointer; z-index: 1000; box-shadow: 0 0 30px rgba(124, 58, 237, 0.5); }
+        .num-btn { background: #151515; border: 1px solid #333; padding: 8px; border-radius: 8px; font-size: 12px; cursor: pointer; }
+        .num-btn:hover { background: #7c3aed; }
+        .change-link { font-size: 10px; color: #4b5563; cursor: pointer; text-decoration: underline; display: block; margin-top: 5px; }
+        .change-link:hover { color: #a855f7; }
+    </style>
+</head>
+<body onload="init()">
+
+    <!-- واجهة الدخول والقوانين -->
+    <div id="rules-overlay" class="fixed inset-0 bg-black z- flex items-center justify-center">
+        <div class="bg-[#0a0a0a] border border-[#7c3aed] p-10 rounded-[40px] w-[550px] text-center">
+            <h1 class="text-6xl font-black text-purple-600 mb-8 italic">REX SYSTEM</h1>
+            <div class="space-y-3 mb-8 text-right text-gray-400 text-xs">
+                <p>• القانون 1: الاسم بالعربي (3 حروف فأكثر).</p>
+                <p>• القانون 2: يمنع تكرار التسجيل تحت طائلة الحذف.</p>
+                <p>• القانون 3: البقاء متصلاً شرط أساسي لدخول السحب.</p>
+            </div>
+            <input type="text" id="fullName" placeholder="سجل اسمك بالعربي..." class="w-full p-4 bg-black border border-purple-900/50 rounded-xl text-center mb-4 text-white font-bold outline-none focus:border-purple-600">
+            <button onclick="userLogin()" class="w-full bg-purple-600 py-4 rounded-xl font-black text-lg">دخول النظام ⚡</button>
+        </div>
+    </div>
+
+    <!-- زر الزائد لإدارة المتسابقين -->
+    <div id="admin-plus-btn" onclick="openAdmin()">+</div>
+
+    <!-- لوحة التحكم الجانبية -->
+    <div id="side-admin">
+        <div class="flex justify-between items-center mb-10 border-b border-white/5 pb-4">
+            <h2 class="text-xl font-black text-purple-500 italic">ADMIN CONTROL</h2>
+            <button onclick="closeAdmin()" class="text-red-500 font-bold text-xl">×</button>
+        </div>
+
+        <!-- دخول المسؤول -->
+        <div id="authBox">
+            <input type="password" id="passInput" placeholder="أدخل الرمز" class="w-full p-4 bg-black border border-white/10 rounded-xl mb-4 text-center">
+            <button onclick="adminLogin()" class="w-full bg-purple-600 py-3 rounded-xl font-black">LOGIN 🔐</button>
+        </div>
+
+        <div id="adminContent" class="hidden space-y-6">
+            <!-- إضافة متسابق يدوي -->
+            <div class="bg-white/5 p-4 rounded-2xl border border-white/5">
+                <p class="text-[10px] text-purple-400 font-bold mb-2 uppercase italic">إضافة متسابق للسحب 🏆</p>
+                <input type="text" id="manualName" placeholder="اسم المتسابق الكامل" class="w-full p-3 bg-black border border-white/5 rounded-lg mb-2 text-xs text-center outline-none">
+                <button onclick="addFromAdmin()" class="w-full bg-green-600 py-2 rounded-lg font-bold text-xs">+ إضافة الآن</button>
+            </div>
+
+            <!-- تغيير كلمات المرور بالنص -->
+            <div class="text-center space-y-1">
+                <span class="change-link" onclick="togglePassInput('normal')">تغيير كلمة المرور العادية</span>
+                <input type="text" id="newNormalPass" class="hidden w-full p-1 bg-black border border-purple-900 rounded text-[10px] text-center mb-2" placeholder="الرمز الجديد">
+                
+                <span class="change-link" onclick="togglePassInput('backup')">تغيير الرمز الاحتياطي (REX99)</span>
+                <input type="text" id="newBackupPass" class="hidden w-full p-1 bg-black border border-purple-900 rounded text-[10px] text-center mb-2" placeholder="الرمز الاحتياطي الجديد">
+                
+                <button id="savePassBtn" onclick="saveNewPasswords()" class="hidden w-full bg-blue-900 py-1 rounded text-[10px] font-bold mt-2">حفظ التغييرات</button>
+            </div>
+
+            <div id="adminList" class="h-32 overflow-y-auto space-y-1 border-t border-white/5 pt-4"></div>
+
+            <!-- نظام التشفير A-Z -->
+            <div class="bg-black/50 p-4 rounded-xl border border-purple-900/20">
+                <p class="text-[9px] text-gray-500 text-center mb-2">تشفير زر الطوارئ (العدادات)</p>
+                <div class="grid grid-cols-4 gap-2" id="numGrid"></div>
+                <div id="keyDisplay" class="bg-black p-2 mt-2 rounded border border-purple-900 text-green-500 text-center font-mono h-10 text-xs"></div>
+                <button onclick="saveEmergency()" class="w-full bg-purple-900/40 py-1 mt-2 rounded text-[9px] font-bold">اعتماد التشفير</button>
+            </div>
+            
+            <button onclick="resetSystem()" class="w-full text-red-900 text-[10px] underline">تصفير السحب</button>
+        </div>
+    </div>
+
+    <!-- القائمة اليمين -->
+    <div class="names-sidebar">
+        <h3 class="text-purple-500 font-black text-center mb-6 border-b border-white/5 pb-2 text-sm italic">قائمة المتسابقين 🟢</h3>
+        <div id="listUI" class="overflow-y-auto h-[90vh]"></div>
+    </div>
+
+    <!-- الواجهة الرئيسية -->
+    <main class="flex flex-col items-center justify-center h-screen pr-[280px]">
+        <div id="display" class="text-8xl font-black italic text-white/10 uppercase tracking-tighter">REX</div>
+        <div id="drawBtnArea" class="hidden">
+            <button onclick="startDraw()" class="bg-white text-black px-16 py-6 rounded-3xl font-black text-4xl shadow-2xl hover:bg-purple-600 hover:text-white transition-all">START 🎰</button>
+        </div>
+        <div class="fixed top-2 left-2 w-10 h-10 opacity-0 cursor-pointer" onclick="openAdmin()"></div>
+    </main>
+
+    <script>
+        let members = JSON.parse(localStorage.getItem('rex_v2026_pro')) || [];
+        let adminPass = localStorage.getItem('rex_pass') || "1252";
+        let backupPass = localStorage.getItem('rex_backup') || "REX99";
+        let emergencyKey = localStorage.getItem('rex_e_key') || "REX";
+        let currentSequence = ""; let decodedKey = "";
+
+        const alpha = " ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+
+        function init() {
+            if(sessionStorage.getItem('rex_user')) document.getElementById('rules-overlay').style.display = 'none';
+            buildKeypad();
+            updateUI();
+        }
+
+        // إظهار وإخفاء حقول تغيير الرمز
+        function togglePassInput(type) {
+            document.getElementById('savePassBtn').classList.remove('hidden');
+            if(type === 'normal') document.getElementById('newNormalPass').classList.toggle('hidden');
+            if(type === 'backup') document.getElementById('newBackupPass').classList.toggle('hidden');
+        }
+
+        function saveNewPasswords() {
+            const n = document.getElementById('newNormalPass').value;
+            const b = document.getElementById('newBackupPass').value;
+            if(n) { adminPass = n; localStorage.setItem('rex_pass', n); }
+            if(b) { backupPass = b; localStorage.setItem('rex_backup', b); }
+            alert("تم تحديث كلمات المرور بنجاح!");
+            location.reload();
+        }
+
+        function adminLogin() {
+            const p = document.getElementById('passInput').value.toUpperCase();
+            if(p === adminPass || p === backupPass || p === emergencyKey) {
+                document.getElementById('authBox').style.display = 'none';
+                document.getElementById('adminContent').style.display = 'block';
+                document.getElementById('drawBtnArea').style.display = 'block';
+                document.getElementById('admin-plus-btn').style.display = 'flex';
+                document.getElementById('display').style.opacity = "1";
+            } else { alert("الرمز خطأ!"); }
+        }
+
+        function addFromAdmin() {
+            const name = document.getElementById('manualName').value.trim();
+            if(name) { members.push({id: "ADM-"+Date.now(), name}); save(); document.getElementById('manualName').value = ""; }
+        }
+
+        function userLogin() {
+            const name = document.getElementById('fullName').value.trim();
+            if (name.length < 3 || /[a-zA-Z0-9]/.test(name)) return alert("الاسم بالعربي فقط (3 حروف فأكثر)!");
+            sessionStorage.setItem('rex_user', name);
+            members.push({id: Date.now(), name});
+            save();
+            document.getElementById('rules-overlay').style.display = 'none';
+        }
+
+        // بناء العدادات (0-9، -، C)
+        function buildKeypad() {
+            const grid = document.getElementById('numGrid');
+            const keys = ['0','-','1','2','3','4','5','6','7','8','9','C'];
+            keys.forEach(k => {
+                const b = document.createElement('button');
+                b.className = "num-btn" + (k === 'C' ? " text-red-500" : "");
+                b.innerText = k;
+                b.onclick = () => k === 'C' ? clearKeys() : pressNum(k);
+                grid.appendChild(b);
+            });
+        }
+
+        function pressNum(v) {
+            currentSequence += v;
+            if(currentSequence.includes("0-")) {
+                let num = parseInt(currentSequence.split("0-")[1]);
+                if(num >= 1 && num <= 26) { decodedKey += alpha[num]; currentSequence = ""; }
+            }
+            document.getElementById('keyDisplay').innerText = decodedKey + (currentSequence ? " ("+currentSequence+")" : "");
+        }
+
+        function clearKeys() { currentSequence = ""; decodedKey = ""; document.getElementById('keyDisplay').innerText = ""; }
+        function saveEmergency() { if(decodedKey) { emergencyKey = decodedKey; localStorage.setItem('rex_e_key', decodedKey); alert("تم اعتماد الشفرة: " + decodedKey); clearKeys(); } }
+        function deleteMember(id) { members = members.filter(m => m.id !== id); save(); }
+        function save() { localStorage.setItem('rex_v2026_pro', JSON.stringify(members)); updateUI(); }
+        function updateUI() {
+            document.getElementById('listUI').innerHTML = members.map(m => `<div class="name-card">${m.name}</div>`).join('');
+            document.getElementById('adminList').innerHTML = members.map(m => `<div class="flex justify-between p-1 text-[9px] border-b border-white/5"><span>${m.name}</span><button onclick="deleteMember(${m.id})" class="text-red-500 px-2">×</button></div>`).join('');
+        }
+
+        function startDraw() {
+            if(members.length < 2) return alert("القائمة غير كافية!");
+            let i = 0; const d = document.getElementById('display');
+            const t = setInterval(() => {
+                d.innerText = members[Math.floor(Math.random() * members.length)].name;
+                if(++i > 30) { clearInterval(t); d.style.color = "#a855f7"; }
+            }, 60);
+        }
+        function openAdmin() { document.getElementById('side-admin').classList.add('active'); }
+        function closeAdmin() { document.getElementById('side-admin').classList.remove('active'); }
+        function resetSystem() { localStorage.clear(); location.reload(); }
+    </script>
+</body>
+</html>
