@@ -3,28 +3,44 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>REX SYSTEM | النسخة النهائية الشاملة</title>
+    <title>REX SYSTEM | النسخة الاحترافية الشاملة</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://cdn.jsdelivr.net"></script>
     <link href="https://fonts.googleapis.com" rel="stylesheet">
     <style>
         body { background-color: #050505; color: white; font-family: 'Tajawal', sans-serif; overflow: hidden; height: 100vh; margin: 0; }
+        
+        /* حالة المسؤول في الزاوية */
         #admin-status { position: fixed; top: 15px; left: 15px; padding: 5px 15px; border-radius: 20px; font-size: 10px; font-weight: bold; z-index: 1000; border: 1px solid rgba(255,255,255,0.1); }
         .on { background: rgba(16, 185, 129, 0.2); color: #10b981; border-color: #10b981 !important; box-shadow: 0 0 10px #10b981; }
         .off { background: rgba(255,255,255,0.05); color: #666; }
-        .rex-logo { font-size: 100px; font-weight: 900; color: #a855f7; text-shadow: 0 0 30px #a855f7; z-index: 10; letter-spacing: 25px; italic: true; }
+
+        /* شعار ريكس الفخم */
+        .rex-logo { font-size: 100px; font-weight: 900; color: #a855f7; text-shadow: 0 0 30px #a855f7; z-index: 10; letter-spacing: 25px; font-style: italic; text-align: center; }
+
+        /* القوانين */
         #rules-overlay { position: fixed; inset: 0; background: #000; z-index: 9999; display: flex; align-items: center; justify-content: center; }
         .rules-card { background: #0a0a0a; border: 2px solid #7c3aed; padding: 40px; border-radius: 30px; width: 450px; text-align: center; }
         .law { background: rgba(124, 58, 237, 0.05); border-right: 3px solid #7c3aed; padding: 10px; margin-bottom: 10px; text-align: right; font-size: 11px; }
+
+        /* لوحة التحكم اليسار */
         #side-admin { position: fixed; top: 0; left: -360px; width: 340px; height: 100%; background: #080808; border-right: 2px solid #7c3aed; z-index: 2000; padding: 25px; transition: 0.5s; overflow-y: auto; }
         #side-admin.active { left: 0; }
+        
+        /* قائمة المشاركين اليمين */
         .names-sidebar { position: fixed; right: 0; top: 0; width: 260px; height: 100%; background: #0a0a0a; border-left: 1px solid #111; padding: 20px; z-index: 50; }
         .name-item { background: #111; padding: 12px; margin-bottom: 10px; border-radius: 12px; border-right: 4px solid #7c3aed; font-size: 14px; font-weight: bold; text-align: center; }
-        #morse-screen { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
+
+        /* الجائزة المعلقة */
         #floating-prize { position: fixed; top: 20px; left: 50%; transform: translateX(-50%); background: rgba(124, 58, 237, 0.1); padding: 10px 40px; border-radius: 50px; backdrop-filter: blur(10px); z-index: 100; border: 1px solid #7c3aed; display: none; }
+
+        /* السحب المتحرك */
         #draw-container { height: 120px; overflow: hidden; position: relative; border-top: 2px solid #7c3aed; border-bottom: 2px solid #7c3aed; width: 100%; display: none; flex-direction: column; align-items: center; }
         .names-track { transition: transform 6s cubic-bezier(0.1, 0, 0.1, 1); display: flex; flex-direction: column; align-items: center; }
         .slot-name { height: 120px; display: flex; align-items: center; justify-content: center; font-size: 50px; font-weight: 900; color: #a855f7; }
+
+        /* شاشة مورس */
+        #morse-screen { position: fixed; inset: 0; background: #000; z-index: 5000; display: none; flex-direction: column; align-items: center; justify-content: center; padding: 20px; }
     </style>
 </head>
 <body onload="init()">
@@ -33,15 +49,15 @@
 
     <!-- الجائزة المعلقة -->
     <div id="floating-prize">
-        <span class="text-xs text-purple-400 block text-center font-bold">جائزة السحب الحالية 🎁</span>
+        <span class="text-xs text-purple-400 block text-center font-bold">جائزة السحب 🎁</span>
         <span id="prize-text" class="text-xl font-black text-white">---</span>
     </div>
 
     <!-- نافذة القوانين والتسجيل -->
     <div id="rules-overlay">
-        <div class="rules-card">
+        <div class="rules-card shadow-2xl">
             <h1 class="text-6xl font-black text-purple-600 mb-6 italic" style="letter-spacing: 15px;">R E X</h1>
-            <div class="space-y-2 mb-8 italic">
+            <div class="space-y-2 mb-8 italic text-right">
                 <div class="law"><p class="text-purple-500 font-bold">1. الاسم:</p><p>الاسم بالعربي فقط (3 حروف فأكثر).</p></div>
                 <div class="law"><p class="text-purple-500 font-bold">2. الانضباط:</p><p>يمنع التلاعب؛ الحذف فوري لأي مخالف.</p></div>
                 <div class="law"><p class="text-purple-500 font-bold">3. التواجد:</p><p>يجب البقاء في الصفحة لدخول السحب.</p></div>
@@ -54,39 +70,45 @@
     <!-- لوحة التحكم -->
     <div id="side-admin">
         <div class="flex justify-between items-center mb-8 border-b border-purple-900/30 pb-4">
-            <h2 class="text-xl font-black text-purple-500 italic">DASHBOARD</h2>
-            <button onclick="toggleAdmin()" class="text-red-500 font-black text-2xl">×</button>
+            <h2 class="text-xl font-black text-purple-500 italic uppercase">Dashboard</h2>
+            <button onclick="toggleAdmin()" class="text-red-500 font-black text-2xl hover:scale-110 transition">×</button>
         </div>
         
         <div id="authBox">
-            <input type="password" id="passInput" placeholder="الرمز السري" class="w-full p-4 bg-black border border-gray-800 rounded-xl mb-4 text-center">
+            <input type="password" id="passInput" placeholder="الرمز السري" class="w-full p-4 bg-black border border-gray-800 rounded-xl mb-4 text-center outline-none focus:border-purple-600">
             <button onclick="adminLogin()" class="w-full bg-purple-600 py-3 rounded-xl font-black">تحقق 🔐</button>
         </div>
 
         <div id="adminContent" class="hidden space-y-6">
+            <!-- إضافة لاعب يدوي -->
             <div class="bg-white/5 p-4 rounded-xl border border-white/5">
-                <p class="text-[10px] text-purple-400 font-bold mb-2">إضافة متسابق يدوي</p>
-                <input type="text" id="manualName" placeholder="الاسم هنا..." class="w-full p-2 bg-black border border-gray-800 rounded mb-2 text-xs text-center">
+                <p class="text-[10px] text-purple-400 font-bold mb-2 uppercase">إضافة متسابق يدوي</p>
+                <input type="text" id="manualName" placeholder="الاسم هنا..." class="w-full p-2 bg-black border border-gray-800 rounded mb-2 text-xs text-center outline-none">
                 <button onclick="addManual()" class="w-full bg-green-700 py-2 rounded font-bold text-xs">إضافة للسحب +</button>
             </div>
 
+            <!-- التحكم بالجائزة -->
             <div class="bg-yellow-500/10 p-4 rounded-xl border border-yellow-600/30">
-                <p class="text-[10px] text-yellow-500 font-bold mb-2">الجائزة المعلقة فوق</p>
-                <input type="text" id="prizeInput" oninput="updatePrizeDisplay()" placeholder="اكتب الجائزة هنا" class="w-full p-2 bg-black border border-gray-800 rounded mb-2 text-xs text-center">
+                <p class="text-[10px] text-yellow-500 font-bold mb-2 uppercase">الجائزة المعلقة</p>
+                <input type="text" id="prizeInput" oninput="updatePrizeDisplay()" placeholder="نوع الجائزة..." class="w-full p-2 bg-black border border-gray-800 rounded mb-2 text-xs text-center">
                 <button onclick="togglePrizeFloating()" class="w-full bg-yellow-700 py-1 rounded text-[10px]">إظهار/إخفاء</button>
             </div>
 
-            <button onclick="openMorse()" class="w-full bg-purple-900/20 p-3 rounded-xl text-xs text-purple-400 border border-purple-600 font-bold italic">نظام شفرة مورس (عربي/إنجليزي) ⚙️</button>
-            
-            <button onclick="toggleDrawArea()" class="w-full bg-blue-600 py-3 rounded-xl font-black text-xs">تفعيل زر السحب 🎰</button>
+            <!-- تغيير الباسورد -->
+            <div class="bg-red-900/20 p-4 rounded-xl border border-red-600/30">
+                <p class="text-[10px] text-red-400 font-bold mb-2 uppercase">🔐 تغيير الرمز السري</p>
+                <input type="password" id="newSecretPass" placeholder="رمز جديد" class="w-full p-2 bg-black border border-gray-800 rounded mb-2 text-xs text-center outline-none">
+                <button onclick="updateAdminPass()" class="w-full bg-red-800 py-2 rounded font-bold text-[10px]">حفظ الرمز الجديد</button>
+            </div>
 
-            <button onclick="adminLogout()" class="w-full bg-red-900/40 py-2 rounded-xl text-red-500 text-xs font-bold">تسجيل خروج الإدارة ⬅️</button>
-            
-            <button onclick="resetAll()" class="w-full text-red-900 text-[10px] underline">تصفير النظام بالكامل</button>
+            <button onclick="openMorse()" class="w-full bg-purple-900/20 p-3 rounded-xl text-xs text-purple-400 border border-purple-600 font-bold italic">شفرة مورس (عربي/إنجليزي) ⚙️</button>
+            <button onclick="toggleDrawArea()" class="w-full bg-blue-600 py-3 rounded-xl font-black text-xs">تفعيل زر السحب 🎰</button>
+            <button onclick="adminLogout()" class="w-full bg-red-900/40 py-2 rounded-xl text-red-500 text-xs font-bold">تسجيل خروج ⬅️</button>
+            <button onclick="resetAll()" class="w-full text-red-900 text-[10px] underline italic">تصفير النظام بالكامل</button>
         </div>
     </div>
 
-    <!-- قائمة المشاركين (يمين) -->
+    <!-- القائمة اليمين -->
     <div class="names-sidebar">
         <h3 class="text-purple-500 font-black text-center mb-6 border-b border-purple-900 pb-2 italic text-sm">المشاركين 🟢</h3>
         <div id="listUI" class="overflow-y-auto h-[85vh] space-y-2"></div>
@@ -101,12 +123,12 @@
             <p id="final-prize" class="text-4xl text-yellow-500 font-black mt-4"></p>
         </div>
         <div id="drawArea" class="hidden fixed bottom-10">
-            <button onclick="startDraw()" class="bg-white text-black px-20 py-6 rounded-3xl font-black text-3xl shadow-2xl">إجراء السحب 🎰</button>
+            <button onclick="startDraw()" class="bg-white text-black px-20 py-6 rounded-3xl font-black text-3xl shadow-2xl hover:bg-purple-600 hover:text-white transition-all active:scale-95">إجراء السحب 🎰</button>
         </div>
         <div class="fixed bottom-0 left-0 w-16 h-16 opacity-0 cursor-pointer" onclick="toggleAdmin()"></div>
     </main>
 
-    <!-- شاشة مورس (عربي وإنجليزي) -->
+    <!-- شاشة مورس -->
     <div id="morse-screen">
         <h2 class="text-3xl font-black text-purple-500 mb-5 italic uppercase">Morse System</h2>
         <div id="morseDisplay" class="text-4xl text-green-500 mb-2 min-h-[50px] tracking-widest"></div>
@@ -124,7 +146,7 @@
 
     <script>
         let members = [];
-        let currentPass = localStorage.getItem('rex_pass') || "123";
+        let currentPass = localStorage.getItem('rex_admin_pass') || "123";
         let morseInput = "";
 
         const morseLib = {
@@ -137,21 +159,18 @@
             if (saved) { members = JSON.parse(saved); updateUI(); }
         }
 
-        function userLogin() {
-            let n = document.getElementById('fullName').value.trim();
-            if(n.length < 3) return alert("الاسم قصير!");
-            members.push({name: n});
-            saveAndRefresh();
-            document.getElementById('rules-overlay').style.display = 'none';
+        function updateAdminPass() {
+            let n = document.getElementById('newSecretPass').value.trim();
+            if(n) { currentPass = n; localStorage.setItem('rex_admin_pass', n); alert("تم تغيير كلمة السر بنجاح ✅"); document.getElementById('newSecretPass').value=""; }
         }
 
         function adminLogin() {
-            if(document.getElementById('passInput').value === currentPass) {
+            if (document.getElementById('passInput').value === currentPass) {
                 document.getElementById('authBox').classList.add('hidden');
                 document.getElementById('adminContent').classList.remove('hidden');
-                document.getElementById('admin-status').innerText = "المسؤول متصل 🟢";
                 document.getElementById('admin-status').className = "on";
-            }
+                document.getElementById('admin-status').innerText = "المسؤول متصل 🟢";
+            } else { alert("الرمز خطأ!"); }
         }
 
         function adminLogout() {
@@ -160,6 +179,19 @@
             document.getElementById('admin-status').className = "off";
             document.getElementById('admin-status').innerText = "المسؤول غير متصل ⚪";
             toggleAdmin();
+        }
+
+        function userLogin() {
+            let n = document.getElementById('fullName').value.trim();
+            if(n.length < 3) return alert("الاسم قصير!");
+            members.push({name: n});
+            saveAndRefresh();
+            document.getElementById('rules-overlay').style.display = 'none';
+        }
+
+        function addManual() {
+            let n = document.getElementById('manualName').value.trim();
+            if(n) { members.push({name: n}); saveAndRefresh(); document.getElementById('manualName').value=""; }
         }
 
         function startDraw() {
@@ -206,7 +238,6 @@
         }
 
         function clearMorse() { morseInput = ""; document.getElementById('morseDisplay').innerText = ""; document.getElementById('translation').innerText = "الترجمة: ---"; }
-        function addManual() { let n = document.getElementById('manualName').value; if(n){ members.push({name:n}); saveAndRefresh(); document.getElementById('manualName').value=""; } }
         function updatePrizeDisplay() { document.getElementById('prize-text').innerText = document.getElementById('prizeInput').value || "---"; }
         function togglePrizeFloating() { let p = document.getElementById('floating-prize'); p.style.display = (p.style.display==='none'?'block':'none'); }
         function toggleAdmin() { document.getElementById('side-admin').classList.toggle('active'); }
